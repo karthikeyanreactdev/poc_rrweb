@@ -1,4 +1,3 @@
-// PaymentPage.js
 import {
   Box,
   Button,
@@ -14,7 +13,7 @@ import {
 import { useFormik } from "formik";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { record } from "rrweb";
+import { record, getRecordConsolePlugin } from "rrweb";
 import "rrweb-player/dist/style.css";
 import * as Yup from "yup";
 import PlayerComponent from "../player";
@@ -25,44 +24,66 @@ const RecordComponent = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const navigate = useNavigate();
 
-  let stopFn = record({
-    emit: function emit(event) {
-      events.push(event);
-      // you should use console.log in this way to avoid errors.
-      // const defaultLog = console.log["__rrweb_original__"]
-      //   ? console.log["__rrweb_original__"]
-      //   : console.log;
-      events.push(event);
-    },
-    skipInactive: true,
-    // packFn: rrweb.pack,
-    maskAllInputs: true,
-    recordCanvas: true,
-    sampling: {
-      mousemove: true,
-      mouseInteraction: true,
-      scroll: 150,
-      media: 800,
-    },
-    // plugins: [
-    //   getRecordConsolePlugin({
-    //     level: ["info", "log", "warn", "error"],
-    //     lengthThreshold: 10000,
-    //     stringifyOptions: {
-    //       stringLengthLimit: 1000,
-    //       numOfKeysLimit: 100,
-    //       depthOfLimit: 1,
-    //     },
-    //     logger: window.console,
-    //   }),
-    // ],
-  });
-
   const initialValues = {
     cardNumber: "",
     cardHolder: "",
     expiryDate: "",
     cvv: "",
+  };
+
+  const startRecord = () => {
+    console.log("cchdsds");
+    console.error("dsds");
+    record({
+      emit: function emit(event) {
+        // events.push(event);
+        // you should use console.log in this way to avoid errors.
+        // const defaultLog = console.log["__rrweb_original__"]
+        //   ? console.log["__rrweb_original__"]
+        //   : console.log;
+        const defaultLog = console.log["__rrweb_original__"]
+          ? console.log["__rrweb_original__"]
+          : console.log;
+        defaultLog(event);
+        if (events.length > 500) {
+          // stop after 100 events
+          return;
+          // stopFn();
+        }
+        events.push(event);
+      },
+      // skipInactive: true,
+      // // packFn: rrweb.pack,
+      // maskAllInputs: true,
+      // recordCanvas: true,
+      sampling: {
+        mousemove: true,
+        mouseInteraction: true,
+        scroll: 150,
+        media: 800,
+      },
+      // plugins: [
+      //   getRecordConsolePlugin({
+      //     level: ["info", "log", "warn", "error"],
+      //     lengthThreshold: 10000,
+      //     stringifyOptions: {
+      //       stringLengthLimit: 1000,
+      //       numOfKeysLimit: 100,
+      //       depthOfLimit: 1,
+      //     },
+      //     logger: window.console,
+      //   }),
+      // ],
+      plugins: [getRecordConsolePlugin()],
+    });
+  };
+
+  const stopRecord = () => {
+    record({
+      emit: function emit() {
+        return;
+      },
+    });
   };
 
   const validationSchema = Yup.object({
@@ -191,11 +212,19 @@ const RecordComponent = () => {
                 <Button variant="contained" type="submit">
                   Submit
                 </Button>
+
                 <Button
                   variant="contained"
-                  ml={4}
-                  sx={{ ml: 4 }}
+                  sx={{ mx: 4 }}
+                  onClick={startRecord}
+                >
+                  start
+                </Button>
+                <Button
+                  variant="contained"
+                  sx={{ mr: 4 }}
                   onClick={() => {
+                    stopRecord();
                     setOpenDialog(true);
                     // console.log(events);
                     // navigate("/player", { state: { data: events } });
