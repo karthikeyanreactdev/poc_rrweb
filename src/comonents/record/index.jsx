@@ -23,7 +23,6 @@ const RecordComponent = () => {
   const [player, setPlayer] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
   const navigate = useNavigate();
-  const [defaultLogFull, setDefaultLogFull] = useState([]);
 
   const initialValues = {
     cardNumber: "",
@@ -42,18 +41,15 @@ const RecordComponent = () => {
         // const defaultLog = console.log["__rrweb_original__"]
         //   ? console.log["__rrweb_original__"]
         //   : console.log;
-
+        const defaultLog = console.log["__rrweb_original__"]
+          ? console.log["__rrweb_original__"]
+          : console.log;
+        defaultLog(event);
         if (events.length > 500) {
           // stop after 100 events
           return;
           // stopFn();
         }
-        const defaultLog = console.log["__rrweb_original__"]
-          ? console.log["__rrweb_original__"]
-          : console.log;
-        // defaultLog(event);
-        // setDefaultLogFull(defaultLog)
-        setDefaultLogFull((oldArray) => [...oldArray, defaultLog]);
         events.push(event);
       },
       // skipInactive: true,
@@ -78,18 +74,7 @@ const RecordComponent = () => {
       //     logger: window.console,
       //   }),
       // ],
-      plugins: [
-        getRecordConsolePlugin({
-          level: ["info", "log", "warn", "error"],
-          lengthThreshold: 10000,
-          stringifyOptions: {
-            stringLengthLimit: 1000,
-            numOfKeysLimit: 100,
-            depthOfLimit: 1,
-          },
-          logger: window.console,
-        }),
-      ],
+      plugins: [getRecordConsolePlugin()],
     });
   };
 
@@ -261,12 +246,7 @@ const RecordComponent = () => {
       >
         <DialogTitle>Session Replay</DialogTitle>
         <DialogContent>
-          <PlayerComponent
-            events={events}
-            key={"1"}
-            reset={reset}
-            defaultLogFull={defaultLogFull}
-          />
+          <PlayerComponent events={events} key={"1"} reset={reset} />
         </DialogContent>
       </Dialog>
     </Box>
